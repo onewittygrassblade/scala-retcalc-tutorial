@@ -1,0 +1,8 @@
+*.class
+
+# sbt
+.bsp
+target
+
+# intellij
+.idea
