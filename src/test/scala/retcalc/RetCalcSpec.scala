@@ -5,6 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 class RetCalcSpec extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
+
   implicit val doubleEquality: Equality[Double] =
     TolerantNumerics.tolerantDoubleEquality(0.0001)
 
@@ -50,6 +51,46 @@ class RetCalcSpec extends AnyWordSpec with Matchers with TypeCheckedTripleEquals
 
       capitalAtRetirement should ===(541267.1990)
       capitalAfterDeath should ===(309867.5316)
+    }
+  }
+
+  "RetCalc.nbOfMonthsSaving" should {
+    "calculate for how many months I need to save in order to live off savings for n years" in {
+      val actual = RetCalc.nbOfMonthsSaving(
+        monthlyInterestRate = 0.04 / 12,
+        nbOfMonthsInRetirement = 40 * 12,
+        netIncome = 3000,
+        monthlyExpenses = 2000,
+        initialCapital = 10000
+      )
+
+      val expected = 23 * 12 + 1
+      actual should ===(expected)
+    }
+
+    "not crash if the result is very high" in {
+      val actual = RetCalc.nbOfMonthsSaving(
+        monthlyInterestRate = 0.01 / 12,
+        nbOfMonthsInRetirement = 40 * 12,
+        netIncome = 3000,
+        monthlyExpenses = 2999,
+        initialCapital = 0
+      )
+
+      val expected = 8280
+      actual should ===(expected)
+    }
+
+    "not loop forever if a result cannot be obtained" in {
+      val actual = RetCalc.nbOfMonthsSaving(
+        monthlyInterestRate = 0.04 / 12,
+        nbOfMonthsInRetirement = 40 * 12,
+        netIncome = 1000,
+        monthlyExpenses = 2000,
+        initialCapital = 10000
+      )
+
+      actual should ===(Int.MaxValue)
     }
   }
 }
