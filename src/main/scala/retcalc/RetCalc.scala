@@ -2,62 +2,61 @@ package retcalc
 
 import scala.annotation.tailrec
 
+case class RetCalcParams(
+    nbOfMonthsInRetirement: Int,
+    netIncome: Int,
+    monthlyExpenses: Int,
+    initialCapital: Double
+)
+
 object RetCalc {
   def futureCapital(
-                     monthlyInterestRate: Double,
-                     nbOfMonths: Int,
-                     netIncome: Int,
-                     monthlyExpenses: Int,
-                     initialCapital: Double): Double = {
+      returns: Returns,
+      nbOfMonths: Int,
+      netIncome: Int,
+      monthlyExpenses: Int,
+      initialCapital: Double
+  ): Double = {
 
     val monthlySavings = netIncome - monthlyExpenses
 
-    (0 until nbOfMonths).foldLeft(initialCapital)(
-      (accumulated, _) => accumulated * (1 + monthlyInterestRate) + monthlySavings
+    (0 until nbOfMonths).foldLeft(initialCapital)((accumulated, month) =>
+      accumulated * (1 + Returns.monthlyRate(returns, month)) + monthlySavings
     )
   }
 
   def simulatePlan(
-                    monthlyInterestRate: Double,
-                    nbOfMonthsSaving: Int,
-                    nbOfMonthsInRetirement: Int,
-                    netIncome: Int,
-                    monthlyExpenses: Int,
-                    initialCapital: Double): (Double, Double) = {
+      returns: Returns,
+      params: RetCalcParams,
+      nbOfMonthsSaving: Int
+  ): (Double, Double) = {
+    import params._
 
     val capitalAtRetirement = futureCapital(
-      monthlyInterestRate = monthlyInterestRate,
+      returns = returns,
       nbOfMonths = nbOfMonthsSaving,
       netIncome = netIncome,
       monthlyExpenses = monthlyExpenses,
-      initialCapital = initialCapital)
+      initialCapital = initialCapital
+    )
 
     val capitalAfterDeath = futureCapital(
-      monthlyInterestRate = monthlyInterestRate,
+      returns = OffsetReturns(returns, nbOfMonthsSaving),
       nbOfMonths = nbOfMonthsInRetirement,
       netIncome = 0,
       monthlyExpenses = monthlyExpenses,
-      initialCapital = capitalAtRetirement)
+      initialCapital = capitalAtRetirement
+    )
 
     (capitalAtRetirement, capitalAfterDeath)
   }
 
-  def nbOfMonthsSaving(
-                        monthlyInterestRate: Double,
-                        nbOfMonthsInRetirement: Int,
-                        netIncome: Int,
-                        monthlyExpenses: Int,
-                        initialCapital: Double): Int = {
+  def nbOfMonthsSaving(returns: Returns, params: RetCalcParams): Int = {
+    import params._
+
     @tailrec
     def loop(months: Int): Int = {
-      val (_, capitalAfterDeath) = simulatePlan(
-        monthlyInterestRate = monthlyInterestRate,
-        nbOfMonthsSaving = months,
-        nbOfMonthsInRetirement = nbOfMonthsInRetirement,
-        netIncome = netIncome,
-        monthlyExpenses = monthlyExpenses,
-        initialCapital = initialCapital)
-
+      val (_, capitalAfterDeath) = simulatePlan(returns, params, months)
       if (capitalAfterDeath > 0.0)
         months
       else

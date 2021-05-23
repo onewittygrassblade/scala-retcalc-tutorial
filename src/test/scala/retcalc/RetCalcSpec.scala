@@ -10,9 +10,9 @@ class RetCalcSpec extends AnyWordSpec with Matchers with TypeCheckedTripleEquals
     TolerantNumerics.tolerantDoubleEquality(0.0001)
 
   "RetCalc.futureCapital" should {
-    "calculate the amount of savings in n months" in {
+    "calculate the amount of savings after n months" in {
       val actual = RetCalc.futureCapital(
-        monthlyInterestRate = 0.04 / 12,
+        returns = FixedReturns(0.04),
         nbOfMonths = 25 * 12,
         netIncome = 3000,
         monthlyExpenses = 2000,
@@ -25,7 +25,7 @@ class RetCalcSpec extends AnyWordSpec with Matchers with TypeCheckedTripleEquals
 
     "calculate the amount of savings left after having lived off savings for n months" in {
       val actual = RetCalc.futureCapital(
-        monthlyInterestRate = 0.04 / 12,
+        returns = FixedReturns(0.04),
         nbOfMonths = 40 * 12,
         netIncome = 0,
         monthlyExpenses = 2000,
@@ -38,57 +38,76 @@ class RetCalcSpec extends AnyWordSpec with Matchers with TypeCheckedTripleEquals
   }
 
   "RetCalc.simulatePlan" should {
+    val params = RetCalcParams(
+      nbOfMonthsInRetirement = 40 * 12,
+      netIncome = 3000,
+      monthlyExpenses = 2000,
+      initialCapital = 10000
+    )
+
     "calculate the capital at retirement and after death" in {
       val (capitalAtRetirement, capitalAfterDeath) =
-        RetCalc.simulatePlan(
-          monthlyInterestRate = 0.04 / 12,
-          nbOfMonthsSaving = 25 * 12,
-          nbOfMonthsInRetirement = 40 * 12,
-          netIncome = 3000,
-          monthlyExpenses = 2000,
-          initialCapital = 10000
-        )
+        RetCalc.simulatePlan(returns = FixedReturns(0.04), params, nbOfMonthsSaving = 25 * 12)
 
       capitalAtRetirement should ===(541267.1990)
       capitalAfterDeath should ===(309867.5316)
+    }
+
+    "use different returns for saving and retirement" in {
+      val nbOfMonthsSaving = 25 * 12
+
+      val returns = VariableReturns(
+        Vector.tabulate(nbOfMonthsSaving + params.nbOfMonthsInRetirement)(i =>
+          if (i < nbOfMonthsSaving)
+            VariableReturn(i.toString, 0.04 / 12)
+          else
+            VariableReturn(i.toString, 0.03 / 12)
+        )
+      )
+
+      val (capitalAtRetirement, capitalAfterDeath) =
+        RetCalc.simulatePlan(returns, params, nbOfMonthsSaving)
+
+      capitalAtRetirement should ===(541267.1990)
+      capitalAfterDeath should ===(-57737.7227)
     }
   }
 
   "RetCalc.nbOfMonthsSaving" should {
     "calculate for how many months I need to save in order to live off savings for n years" in {
-      val actual = RetCalc.nbOfMonthsSaving(
-        monthlyInterestRate = 0.04 / 12,
+      val params = RetCalcParams(
         nbOfMonthsInRetirement = 40 * 12,
         netIncome = 3000,
         monthlyExpenses = 2000,
         initialCapital = 10000
       )
+      val actual = RetCalc.nbOfMonthsSaving(FixedReturns(0.04), params)
 
       val expected = 23 * 12 + 1
       actual should ===(expected)
     }
 
     "not crash if the result is very high" in {
-      val actual = RetCalc.nbOfMonthsSaving(
-        monthlyInterestRate = 0.01 / 12,
-        nbOfMonthsInRetirement = 40 * 12,
+      val params = RetCalcParams(
+        nbOfMonthsInRetirement = 60 * 12,
         netIncome = 3000,
         monthlyExpenses = 2999,
         initialCapital = 0
       )
+      val actual = RetCalc.nbOfMonthsSaving(FixedReturns(0.01), params)
 
-      val expected = 8280
+      val expected = 8657
       actual should ===(expected)
     }
 
     "not loop forever if a result cannot be obtained" in {
-      val actual = RetCalc.nbOfMonthsSaving(
-        monthlyInterestRate = 0.04 / 12,
+      val params = RetCalcParams(
         nbOfMonthsInRetirement = 40 * 12,
         netIncome = 1000,
         monthlyExpenses = 2000,
         initialCapital = 10000
       )
+      val actual = RetCalc.nbOfMonthsSaving(FixedReturns(0.04), params)
 
       actual should ===(Int.MaxValue)
     }
