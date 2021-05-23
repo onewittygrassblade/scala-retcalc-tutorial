@@ -35,4 +35,21 @@ class RetCalcSpec extends AnyWordSpec with Matchers with TypeCheckedTripleEquals
       actual should ===(expected)
     }
   }
+
+  "RetCalc.simulatePlan" should {
+    "calculate the capital at retirement and after death" in {
+      val (capitalAtRetirement, capitalAfterDeath) =
+        RetCalc.simulatePlan(
+          monthlyInterestRate = 0.04 / 12,
+          nbOfMonthsSaving = 25 * 12,
+          nbOfMonthsInRetirement = 40 * 12,
+          netIncome = 3000,
+          monthlyExpenses = 2000,
+          initialCapital = 10000
+        )
+
+      capitalAtRetirement should ===(541267.1990)
+      capitalAfterDeath should ===(309867.5316)
+    }
+  }
 }
