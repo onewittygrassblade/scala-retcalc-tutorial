@@ -13,21 +13,22 @@ object SimulatePlanApp extends App {
       InflationData.fromResource("cpi.tsv")
     )
 
-    val (capitalAtRetirement, capitalAfterDeath) =
-      RetCalc.simulatePlan(
-        returns = returns.fromUntil(from, until),
-        params = RetCalcParams(
-          nbOfMonthsInRetirement = nbOfYearsInRetirement * 12,
-          netIncome = args(3).toInt,
-          monthlyExpenses = args(4).toInt,
-          initialCapital = args(5).toInt
-        ),
-        nbOfMonthsSaving = nbOfYearsSaving * 12
-      )
-
-    s"""
-      |Capital after $nbOfYearsSaving years of savings: ${capitalAtRetirement.round}
-      |Capital after $nbOfYearsInRetirement years of retirement: ${capitalAfterDeath.round}
-      |""".stripMargin
+    RetCalc.simulatePlan(
+      returns = returns.fromUntil(from, until),
+      params = RetCalcParams(
+        nbOfMonthsInRetirement = nbOfYearsInRetirement * 12,
+        netIncome = args(3).toInt,
+        monthlyExpenses = args(4).toInt,
+        initialCapital = args(5).toInt
+      ),
+      nbOfMonthsSaving = nbOfYearsSaving * 12
+    ) match {
+      case Right((capitalAtRetirement, capitalAfterDeath)) =>
+        s"""
+        |Capital after $nbOfYearsSaving years of savings: ${capitalAtRetirement.round}
+        |Capital after $nbOfYearsInRetirement years of retirement: ${capitalAfterDeath.round}
+        |""".stripMargin
+      case Left(err) => err.message
+    }
   }
 }

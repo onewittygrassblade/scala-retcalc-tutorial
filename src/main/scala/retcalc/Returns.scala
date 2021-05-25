@@ -22,10 +22,14 @@ case class OffsetReturns(origin: Returns, offset: Int) extends Returns
 
 object Returns {
   @tailrec
-  def monthlyRate(returns: Returns, month: Int): Double =
+  def monthlyRate(returns: Returns, month: Int): Either[RetCalcError, Double] =
     returns match {
-      case FixedReturns(annualRate)      => annualRate / 12
-      case VariableReturns(returns)      => returns(month % returns.length).monthlyRate
+      case FixedReturns(annualRate) => Right(annualRate / 12)
+      case VariableReturns(returns) =>
+        if (returns.isDefinedAt(month))
+          Right(returns(month).monthlyRate)
+        else
+          Left(RetCalcError.ReturnMonthOutOfBounds(month, returns.size - 1))
       case OffsetReturns(origin, offset) => monthlyRate(origin, month + offset)
     }
 

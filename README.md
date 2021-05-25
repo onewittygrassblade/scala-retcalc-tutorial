@@ -20,7 +20,7 @@ def futureCapital(
       netIncome: Int,
       monthlyExpenses: Int,
       initialCapital: Double
-  ): Double
+  ): Either[RetCalcError, Double]
 ```
 where the `Returns` trait is either a fixed or variable return.
 
@@ -36,7 +36,7 @@ def simulatePlan(
       returns: Returns,
       params: RetCalcParams,
       nbOfMonthsSaving: Int
-  ): (Double, Double)
+  ): Either[RetCalcError, (Double, Double)]
 ```
 
 where `RetCalcParams` encapsulate common parameters:
@@ -58,8 +58,10 @@ Prototype:
 def nbOfMonthsSaving(
       returns: Returns,
       params: RetCalcParams
-  ): Int
+  ): Either[RetCalcError, Int]
 ```
+
+If the input parameters are such that no result can be obtained (expenses greater than income), it returns a ` Left(RetCalcError.MoreExpensesThanIncome)`.
 
 ### Returns.fromEquityAndInflationData
 
@@ -84,3 +86,14 @@ and
 case class InflationData(monthId: String, value: Double)
 ```
 can both be generated from a tsv file using the corresponding `fromResource` function.
+
+### Returns.monthlyRate
+
+This function returns the monthly return rate at a given month for a set of fixed or variable returns.
+
+Prototype:
+```scala
+def monthlyRate(returns: Returns, month: Int): Either[RetCalcError, Double]
+```
+
+If the specified month is not defined in the returns, it returns a `Left(RetCalcError.ReturnMonthOutOfBounds)`.
