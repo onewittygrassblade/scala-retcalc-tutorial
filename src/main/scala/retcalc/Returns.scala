@@ -16,7 +16,7 @@ case class VariableReturns(returns: Vector[VariableReturn]) extends Returns {
 
 }
 
-case class VariableReturn(monthId: String, monthlyRate: Double) extends Returns
+case class VariableReturn(monthId: String, monthlyRate: Double)
 
 case class OffsetReturns(origin: Returns, offset: Int) extends Returns
 
