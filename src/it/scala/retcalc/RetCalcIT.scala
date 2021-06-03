@@ -27,7 +27,7 @@ class RetCalcIT extends AnyWordSpec with EitherValues {
         .fromUntil("1952.09", "2017.10")
 
       val (capitalAtRetirement, capitalAfterDeath) =
-        RetCalc.simulatePlan(returns, params, nbOfMonthsSaving = 25 * 12).right.value
+        RetCalc.simulatePlan(returns, params, nbOfMonthsSaving = 25 * 12).value
       capitalAtRetirement should ===(468924.5522)
       capitalAfterDeath should ===(2958841.7675)
     }
