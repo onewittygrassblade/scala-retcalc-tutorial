@@ -20,12 +20,11 @@ object RetCalc {
 
     val monthlySavings = netIncome - monthlyExpenses
 
-    (0 until nbOfMonths).foldLeft[Either[RetCalcError, Double]](Right(initialCapital))(
-      (accumulated, month) =>
-        for {
-          acc         <- accumulated
-          monthlyRate <- Returns.monthlyRate(returns, month)
-        } yield acc * (1 + monthlyRate) + monthlySavings
+    (0 until nbOfMonths).foldLeft[Either[RetCalcError, Double]](Right(initialCapital))((accumulated, month) =>
+      for {
+        acc         <- accumulated
+        monthlyRate <- Returns.monthlyRate(returns, month)
+      } yield acc * (1 + monthlyRate) + monthlySavings
     )
   }
 
