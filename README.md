@@ -1,3 +1,6 @@
+![CI](https://github.com/onewittygrassblade/scala-retcalc-tutorial/actions/workflows/ci.yml/badge.svg)
+[![codecov](https://codecov.io/gh/onewittygrassblade/scala-retcalc-tutorial/branch/main/graph/badge.svg?token=4GKYLP49CP)](https://codecov.io/gh/onewittygrassblade/scala-retcalc-tutorial)
+
 # Retirement calculator - Scala tutorial
 
 This tutorial is from chapters 2 and 3 of the the [Scala Programming Projects](https://github.com/PacktPublishing/Scala-Programming-Projects) book.
