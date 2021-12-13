@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-      - run: it:sbt
+        run: sbt it:test
   lint:
     name: Check formatting
     runs-on: ubuntu-latest
