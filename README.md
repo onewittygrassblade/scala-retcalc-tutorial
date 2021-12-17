@@ -1,4 +1,4 @@
-![CI](https://github.com/onewittygrassblade/scala-retcalc-tutorial/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/onewittygrassblade/scala-retcalc-tutorial/actions/workflows/ci.yml/badge.svg)](https://github.com/onewittygrassblade/scala-retcalc-tutorial/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/onewittygrassblade/scala-retcalc-tutorial/branch/main/graph/badge.svg?token=4GKYLP49CP)](https://codecov.io/gh/onewittygrassblade/scala-retcalc-tutorial)
 
 # Retirement calculator - Scala tutorial
